@@ -1,0 +1,2 @@
+/home/fstruman/framework/ocr/CMakeFiles/ocrJohn.dir
+/home/fstruman/framework/ocr/CMakeFiles/ocrSaintMichel1.dir
