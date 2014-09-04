@@ -72,7 +72,7 @@ int copyContentOfContour(Mat source, vector<Point> closed_contour, Mat dest) {
             }
         }
     }
-    printf("found %u points inside\n",in);
+    if (debug)  printf("found %u points inside\n",in);
     if (debug) waitKey();
     return in;
 }
@@ -95,7 +95,7 @@ int eraseContentOfContour(Mat source, vector<Point> closed_contour, Mat dest) {
             }
         }
     }
-    printf("found %u points inside\n",in);
+    if (debug)  printf("found %u points inside\n",in);
     if (debug) waitKey();
     return in;
 }
@@ -133,11 +133,11 @@ char* ocrDigit(Mat src) {
     tesseract::TessBaseAPI tess;
     tess.Init(NULL, "liquidcrystal");
     //tess.Init(NULL, "meter2");
-	tess.SetVariable("tessedit_char_whitelist", "0123456789");
+	//tess.SetVariable("tessedit_char_whitelist", "0123456789");
 
     long num = 70;
     string s = "" + num;
-    if (debug) printf("textord_min_xheight = %s\n", s.c_str());
+    if (debug)  printf("textord_min_xheight = %s\n", s.c_str());
 	//tess.SetVariable("textord_min_xheight", "70");
     tess.SetPageSegMode(tesseract::PSM_SINGLE_WORD);
     //tess.SetImage(pix);
@@ -149,9 +149,9 @@ char* ocrDigit(Mat src) {
     int conf1 = tess.MeanTextConf();
     tess.GetTextDirection(&offset, &slope);
 
-    //if (debug) printf("Confidence=%d\n", conf1);
-    //if (debug) printf("Offset: %d Slope: %.2f\n", offset, slope);
-    //if (debug) printf("OCR output:%s\n",outText);
+    //if (debug)  printf("Confidence=%d\n", conf1);
+    //if (debug)  printf("Offset: %d Slope: %.2f\n", offset, slope);
+    //if (debug)  printf("OCR output:%s\n",outText);
 	return outText;
 
 }
@@ -241,26 +241,26 @@ Mat filterContours(Mat src, bool debug) {
     RNG rng(12346);
     for( int i = 0; i < contours.size(); i++ ) {
         Rect roi = boundingRect(contours[i]);
-        if (debug) printf("NEXT SHAPE (%u): height=%u width=%u roi.y=%u src.rows=%u ?\n", i, roi.height, roi.width, roi.y, src.rows);
+        if (debug)  printf("NEXT SHAPE (%u): height=%u width=%u roi.y=%u src.rows=%u ?\n", i, roi.height, roi.width, roi.y, src.rows);
         Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
         if (debug) drawContours(contourMat, contours, i, color, 3, 8, hierarchy, 0);
 		if (debug) namedWindow("countour final", CV_WINDOW_NORMAL );
 		if (debug) imshow("countour final", contourMat);
 		if (debug) waitKey();
         if (hierarchy[i][3]>-1) {
-            if (debug) printf("skip: inside parent\n");
+            if (debug)  printf("skip: inside parent\n");
             continue;
         }
         if (roi.height < src.rows*2/5) {
-            if (debug) printf("skip: height too small: roi.height < src.rows*2/5\n");
+            if (debug)  printf("skip: height too small: roi.height < src.rows*2/5\n");
             continue;
         }
         int area = contourArea(contours[i]);
         if (area < 300) {
-            if (debug) printf("skip: area too small: %u < 100\n", area);
+            if (debug)  printf("skip: area too small: %u < 100\n", area);
             continue;
         }
-        if (debug) printf("ACCEPT %u %u !!!\n", roi.height, roi.width);
+        if (debug)  printf("ACCEPT %u %u !!!\n", roi.height, roi.width);
         copyDigit(src, contours[i], result);
 		if (debug) imshow("result", result);
 		if (debug) waitKey();
@@ -305,28 +305,28 @@ vector<Point> findComma(const Mat src_orig, int cropX, int cropY) {
     int winner = -1;
     for( int i = 0; i < contours.size(); i++ ) {
         Rect roi = boundingRect(contours[i]);
-        if (debug) printf("NEXT SHAPE (%u): height=%u width=%u roi.y=%u src.rows=%u ?\n", i, roi.height, roi.width, roi.y, src.rows);
+        if (debug)  printf("NEXT SHAPE (%u): height=%u width=%u roi.y=%u src.rows=%u ?\n", i, roi.height, roi.width, roi.y, src.rows);
         Scalar color = Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
         if (debug) drawContours(contourMat, contours, i, color, 3, 8, hierarchy, 0);
 		if (debug) namedWindow("countour final", CV_WINDOW_NORMAL );
 		if (debug) imshow("countour final", contourMat);
 		if (debug) waitKey();
         if (winner >= 0 && roi.y < boundingRect(contours[winner]).y) {
-            printf("current winner y is lower, no change of winner\n",winner, i);
+            if (debug) printf("current winner y is lower, no change of winner\n",winner, i);
             continue;
         }
         int area = contourArea(contours[i]);
         if (area < 45 || area > 100) {
-            if (debug) printf("skip: area (x,y,w,h) (%u,%u,%u,%u) not within range: 120 < %u < 180 \n", roi.x, roi.y, roi.width, roi.height, area);
+            if (debug)  printf("skip: area (x,y,w,h) (%u,%u,%u,%u) not within range: 120 < %u < 180 \n", roi.x, roi.y, roi.width, roi.height, area);
             continue;
         }
         if (debug) drawContours(contourMatSelected, contours, i, color, 3, 8, hierarchy, 0);
 		if (debug) namedWindow("findComma: countour candidate", CV_WINDOW_NORMAL );
     	if (debug) imshow("findComma: countour candidate", contourMatSelected);
 	    if (debug) waitKey();
-        printf("change of winner from %u to %u\n",winner, i);
+        if (debug) printf("change of winner from %u to %u\n",winner, i);
         winner = i;
-        if (debug) printf("ACCEPT %u %u !!!\n", roi.height, roi.width);
+        if (debug)  printf("ACCEPT %u %u !!!\n", roi.height, roi.width);
         if (debug) drawContours(result, contours, winner, color, 3, 8, hierarchy, 0);
     	if (debug) namedWindow("findComma: comma detected", CV_WINDOW_NORMAL );
 	    if (debug) imshow("findComma: comma detected", result);
@@ -366,7 +366,7 @@ int main( int argc, char** argv )
 
     RNG rng(12345);
     if (argc<2) {
-        //if (debug) printf("You must provide at least one argument\n");
+        //if (debug)  printf("You must provide at least one argument\n");
         exit(0);
     }
 
@@ -382,7 +382,7 @@ int main( int argc, char** argv )
     if(debug) imshow("orig", src);
     if (debug) waitKey();
 
-    printf("image after cropping (cols,rows) = (%u,%u)\n",src.cols, src.rows);
+    if (debug) printf("image after cropping (cols,rows) = (%u,%u)\n",src.cols, src.rows);
 
     Mat tmp = src.clone();
     int cropX = 3*src.cols/4, cropY = 2 * src.rows / 3;
@@ -391,7 +391,7 @@ int main( int argc, char** argv )
     minEnclosingCircle( contourComma, center, radius );
     if (debug) {
 		circle( tmp, center, radius, 255, 2, 8, 0 );
-		printf("comma circle center (%f,%f) and radius %f", center.x, center.y, radius);
+		if (debug) printf("comma circle center (%f,%f) and radius %f", center.x, center.y, radius);
 		if(debug) namedWindow("comma detected", CV_WINDOW_NORMAL );
 		if(debug) imshow("comma detected", tmp);
 		if (debug) waitKey();
@@ -434,7 +434,7 @@ int main( int argc, char** argv )
         string s = string(argv[1]);
         int pos1 = s.find_last_of("/");
         string name = "/tmp/" + s.substr(pos1+1) + ".tif";
-        if (debug) printf("img %s written to disk\n",name.c_str());
+        if (debug)  printf("img %s written to disk\n",name.c_str());
         imwrite( name, inputOCR);
     }
 
